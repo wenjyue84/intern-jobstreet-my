@@ -1,13 +1,13 @@
 
 const { Client } = require('pg');
 
-const connectionString = "postgres://postgres.wanxlxbaaqfukbxicpjk:KuxIbMkCRqQEp7ZA@aws-1-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require&supa=base-pooler.x";
+const connectionString = "postgres://postgres.wanxlxbaaqfukbxicpjk:KuxIbMkCRqQEp7ZA@aws-1-us-east-1.pooler.supabase.com:6543/postgres?supa=base-pooler.x";
 
 const client = new Client({
-    connectionString,
-    ssl: {
-        rejectUnauthorized: false
-    }
+  connectionString,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 const createTableQuery = `
@@ -35,23 +35,23 @@ const seedDataQuery = `
 `;
 
 async function setupDatabase() {
-    try {
-        await client.connect();
-        console.log('Connected to database...');
+  try {
+    await client.connect();
+    console.log('Connected to database...');
 
-        console.log('Creating "jobs" table...');
-        await client.query(createTableQuery);
-        console.log('Table created successfully.');
+    console.log('Creating "jobs" table...');
+    await client.query(createTableQuery);
+    console.log('Table created successfully.');
 
-        console.log('Seeding data...');
-        await client.query(seedDataQuery);
-        console.log('Data seeded successfully.');
+    console.log('Seeding data...');
+    await client.query(seedDataQuery);
+    console.log('Data seeded successfully.');
 
-    } catch (err) {
-        console.error('Error setting up database:', err);
-    } finally {
-        await client.end();
-    }
+  } catch (err) {
+    console.error('Error setting up database:', err);
+  } finally {
+    await client.end();
+  }
 }
 
 setupDatabase();

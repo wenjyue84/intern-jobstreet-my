@@ -1,19 +1,40 @@
 import Head from 'next/head';
 import Layout from '../components/Layout';
 import JobCard from '../components/JobCard';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
 import { MOCK_JOBS } from '../lib/data';
 
 export default function Home() {
     const [searchTerm, setSearchTerm] = useState('');
     const [locationTerm, setLocationTerm] = useState('');
+    const [jobs, setJobs] = useState(MOCK_JOBS);
 
-    const filteredJobs = MOCK_JOBS.filter(job => {
+    useEffect(() => {
+        const fetchJobs = async () => {
+            const { data, error } = await supabase
+                .from('jobs')
+                .select('*')
+                .order('posted_at', { ascending: false });
+
+            if (!error && data) {
+                const formattedJobs = data.map(job => ({
+                    ...job,
+                    postedAt: new Date(job.posted_at).toLocaleDateString(), // Map posted_at to postedAt
+                    tags: Array.isArray(job.tags) ? job.tags : (job.tags ? job.tags.split(',') : []) // Ensure tags is array
+                }));
+                setJobs([...formattedJobs, ...MOCK_JOBS]);
+            }
+        };
+        fetchJobs();
+    }, []);
+
+    const filteredJobs = jobs.filter(job => {
         const matchesSearch =
             job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            job.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+            (job.tags && job.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
 
         const matchesLocation = job.location.toLowerCase().includes(locationTerm.toLowerCase());
 

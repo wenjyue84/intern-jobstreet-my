@@ -1,22 +1,97 @@
 import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabaseClient';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
+import { useAuth } from '../../context/AuthContext';
 
 import { MOCK_JOBS } from '../../lib/data';
 
 export default function JobDetail() {
     const router = useRouter();
     const { id } = router.query;
+    const { user } = useAuth();
+    const [job, setJob] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [isSaved, setIsSaved] = useState(false);
 
-    // In a real app, we would fetch data based on ID. 
-    // Here we just find it in the mock array.
-    const job = MOCK_JOBS.find(j => j.id.toString() === id);
+    useEffect(() => {
+        if (user && id) {
+            const savedJobs = JSON.parse(localStorage.getItem(`savedJobs_${user.email}`)) || [];
+            setIsSaved(savedJobs.includes(id));
+        }
+    }, [user, id]);
+
+    const handleSave = () => {
+        if (!user) {
+            router.push(`/login?redirect=${router.asPath}`);
+            return;
+        }
+
+        const savedJobs = JSON.parse(localStorage.getItem(`savedJobs_${user.email}`)) || [];
+
+        if (isSaved) {
+            const newSavedJobs = savedJobs.filter(jobId => jobId !== id);
+            localStorage.setItem(`savedJobs_${user.email}`, JSON.stringify(newSavedJobs));
+            setIsSaved(false);
+            alert('Job removed from saved list.');
+        } else {
+            savedJobs.push(id);
+            localStorage.setItem(`savedJobs_${user.email}`, JSON.stringify(savedJobs));
+            setIsSaved(true);
+            alert('Job saved successfully!');
+        }
+    };
+
+    useEffect(() => {
+        if (!id) return;
+
+        const foundMock = MOCK_JOBS.find(j => j.id.toString() === id);
+        if (foundMock) {
+            setJob(foundMock);
+            setLoading(false);
+        } else {
+            const fetchJob = async () => {
+                try {
+                    const { data, error } = await supabase
+                        .from('jobs')
+                        .select('*')
+                        .eq('id', id)
+                        .single();
+
+                    if (data) {
+                        setJob({
+                            ...data,
+                            postedAt: new Date(data.posted_at).toLocaleDateString(),
+                            tags: Array.isArray(data.tags) ? data.tags : (data.tags ? data.tags.split(',') : [])
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching job:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchJob();
+        }
+    }, [id]);
+
+    if (loading) {
+        return (
+            <Layout>
+                <div className="container" style={{ padding: '100px 0', textAlign: 'center' }}>
+                    <h2>Loading...</h2>
+                </div>
+            </Layout>
+        );
+    }
 
     if (!job) {
         return (
             <Layout>
                 <div className="container" style={{ padding: '100px 0', textAlign: 'center' }}>
-                    <h2>Loading...</h2>
+                    <h2>Job not found</h2>
+                    <Link href="/" style={{ color: '#0032A0', marginTop: '20px', display: 'inline-block' }}>Back to Jobs</Link>
                 </div>
             </Layout>
         );
@@ -75,11 +150,25 @@ export default function JobDetail() {
                         <p style={{ marginBottom: '20px', color: '#666' }}>
                             Please prepare your CV and University Letter before applying.
                         </p>
-                        <button className="btn btn-primary" style={{ width: '100%', padding: '15px', fontSize: '1.1rem' }}>
+                        <button
+                            className="btn btn-primary"
+                            style={{ width: '100%', padding: '15px', fontSize: '1.1rem' }}
+                            onClick={() => {
+                                if (!user) {
+                                    router.push(`/login?redirect=${router.asPath}`);
+                                } else {
+                                    alert('Application submitted successfully! (Mock)');
+                                }
+                            }}
+                        >
                             Apply Now 🚀
                         </button>
-                        <button className="btn btn-secondary" style={{ width: '100%', padding: '15px', marginTop: '10px' }}>
-                            Save for Later
+                        <button
+                            className={`btn ${isSaved ? 'btn-primary' : 'btn-secondary'}`}
+                            style={{ width: '100%', padding: '15px', marginTop: '10px', backgroundColor: isSaved ? '#4CAF50' : '', borderColor: isSaved ? '#4CAF50' : '' }}
+                            onClick={handleSave}
+                        >
+                            {isSaved ? 'Saved ✓' : 'Save for Later'}
                         </button>
                     </div>
                 </div>

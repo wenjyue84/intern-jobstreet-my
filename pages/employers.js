@@ -1,8 +1,12 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 
 export default function Employers() {
+    const { user } = useAuth();
+    const router = useRouter();
     return (
         <Layout>
             <Head>
@@ -17,8 +21,15 @@ export default function Employers() {
                     <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto 30px' }}>
                         Connect with top talent from leading universities. Post jobs for free and start hiring today.
                     </p>
-                    <Link href="/signup?role=employer">
-                        <button className="btn" style={{
+                    <button className="btn"
+                        onClick={() => {
+                            if (user) {
+                                router.push('/post-job');
+                            } else {
+                                router.push('/signup?role=employer&redirect=/post-job');
+                            }
+                        }}
+                        style={{
                             background: 'white',
                             color: '#0032A0',
                             padding: '15px 30px',
@@ -28,9 +39,8 @@ export default function Employers() {
                             cursor: 'pointer',
                             borderRadius: '8px'
                         }}>
-                            Post a Job for Free
-                        </button>
-                    </Link>
+                        Post a Job for Free
+                    </button>
                 </div>
             </section>
 

@@ -14,7 +14,8 @@ export default function Login() {
         e.preventDefault();
         const success = login(email, password);
         if (success) {
-            router.push('/');
+            const redirectPath = router.query.redirect || '/';
+            router.push(redirectPath);
         }
     };
 

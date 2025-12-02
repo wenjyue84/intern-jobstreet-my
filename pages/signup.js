@@ -22,7 +22,8 @@ export default function Signup() {
         e.preventDefault();
         const success = signup(name, email, password, role);
         if (success) {
-            router.push('/');
+            const redirectPath = router.query.redirect || '/';
+            router.push(redirectPath);
         }
     };
 
