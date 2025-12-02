@@ -24,7 +24,7 @@ export default function JobDetail() {
 
     const handleSave = () => {
         if (!user) {
-            router.push(`/login?redirect=${router.asPath}`);
+            router.push(`/login?redirect=${encodeURIComponent(router.asPath)}`);
             return;
         }
 
@@ -34,12 +34,10 @@ export default function JobDetail() {
             const newSavedJobs = savedJobs.filter(jobId => jobId !== id);
             localStorage.setItem(`savedJobs_${user.email}`, JSON.stringify(newSavedJobs));
             setIsSaved(false);
-            alert('Job removed from saved list.');
         } else {
             savedJobs.push(id);
             localStorage.setItem(`savedJobs_${user.email}`, JSON.stringify(savedJobs));
             setIsSaved(true);
-            alert('Job saved successfully!');
         }
     };
 
@@ -155,7 +153,7 @@ export default function JobDetail() {
                             style={{ width: '100%', padding: '15px', fontSize: '1.1rem' }}
                             onClick={() => {
                                 if (!user) {
-                                    router.push(`/login?redirect=${router.asPath}`);
+                                    router.push(`/login?redirect=${encodeURIComponent(router.asPath)}`);
                                 } else {
                                     alert('Application submitted successfully! (Mock)');
                                 }
