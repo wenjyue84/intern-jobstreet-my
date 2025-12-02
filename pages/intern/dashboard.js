@@ -14,7 +14,7 @@ export default function Dashboard() {
     useEffect(() => {
         if (!user) {
             router.push('/login');
-        } else if (user.role !== 'student') {
+        } else if (user.role !== 'intern') {
             // If employer, maybe redirect to employer dashboard? For now, home.
             router.push('/');
         } else {
@@ -77,7 +77,7 @@ export default function Dashboard() {
                                 fontSize: '0.8rem',
                                 marginTop: '10px'
                             }}>
-                                {user.role === 'student' ? 'Intern' : user.role}
+                                {user.role === 'intern' ? 'Intern' : user.role}
                             </span>
                         </div>
 

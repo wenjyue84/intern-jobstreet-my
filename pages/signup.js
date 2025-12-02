@@ -8,22 +8,27 @@ export default function Signup() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState('student'); // 'student' or 'employer'
+    const [role, setRole] = useState('intern'); // 'intern' or 'employer'
     const { signup } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
-        if (router.query.role === 'employer' || router.query.role === 'student') {
+        if (router.query.role === 'employer' || router.query.role === 'intern') {
             setRole(router.query.role);
         }
     }, [router.query]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const success = signup(name, email, password, role);
+        const { success, error } = await signup(name, email, password, role);
         if (success) {
-            const redirectPath = router.query.redirect || '/';
+            let redirectPath = router.query.redirect || '/';
+            if (role === 'employer' && !router.query.redirect) {
+                redirectPath = '/employer/profile';
+            }
             router.push(redirectPath);
+        } else {
+            alert('Signup failed: ' + error);
         }
     };
 
@@ -37,21 +42,21 @@ export default function Signup() {
                     <div style={{ display: 'flex', background: '#f0f0f0', padding: '5px', borderRadius: '8px', marginBottom: '30px' }}>
                         <button
                             type="button"
-                            onClick={() => setRole('student')}
+                            onClick={() => setRole('intern')}
                             style={{
                                 flex: 1,
                                 padding: '10px',
                                 border: 'none',
                                 borderRadius: '6px',
-                                background: role === 'student' ? 'white' : 'transparent',
-                                color: role === 'student' ? '#0032A0' : '#666',
-                                fontWeight: role === 'student' ? '600' : '400',
-                                boxShadow: role === 'student' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
+                                background: role === 'intern' ? 'white' : 'transparent',
+                                color: role === 'intern' ? '#0032A0' : '#666',
+                                fontWeight: role === 'intern' ? '600' : '400',
+                                boxShadow: role === 'intern' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s'
                             }}
                         >
-                            Student
+                            Intern
                         </button>
                         <button
                             type="button"
@@ -96,7 +101,7 @@ export default function Signup() {
                                 style={{ width: '100%' }}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="student@university.edu.my"
+                                placeholder="intern@university.edu.my"
                             />
                         </div>
 

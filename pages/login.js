@@ -10,12 +10,18 @@ export default function Login() {
     const { login } = useAuth();
     const router = useRouter();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const success = login(email, password);
+        console.log('Login page: handleSubmit called');
+        const { success, error } = await login(email, password);
+        console.log('Login page: login result', { success, error });
         if (success) {
+            console.log('Login page: redirecting');
             const redirectPath = router.query.redirect ? decodeURIComponent(router.query.redirect) : '/';
             router.push(redirectPath);
+        } else {
+            console.log('Login page: showing alert');
+            alert('Login failed: ' + error);
         }
     };
 
@@ -35,7 +41,7 @@ export default function Login() {
                                 style={{ width: '100%' }}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="student@university.edu.my"
+                                placeholder="intern@university.edu.my"
                             />
                         </div>
 

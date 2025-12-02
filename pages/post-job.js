@@ -20,7 +20,7 @@ export default function PostJob() {
     useEffect(() => {
         if (!user) {
             router.push('/login?redirect=/post-job');
-        } else if (user.role === 'student') {
+        } else if (user.role === 'intern') {
             // Redirect students if they shouldn't post jobs
             router.push('/');
         } else {
@@ -37,6 +37,8 @@ export default function PostJob() {
                 .eq('email', user.email)
                 .single();
 
+            if (error) throw error;
+
             if (data) {
                 setFormData(prev => ({
                     ...prev,
@@ -45,8 +47,12 @@ export default function PostJob() {
                 }));
             }
         } catch (error) {
-            // Ignore error if profile doesn't exist
             console.log('No company profile found or error fetching:', error);
+            // If no profile found, redirect to profile page
+            if (error.code === 'PGRST116') {
+                alert('Please complete your company profile before posting a job.');
+                router.push('/employer/profile');
+            }
         }
     };
 

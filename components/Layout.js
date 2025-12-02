@@ -11,6 +11,7 @@ export default function Layout({ children }) {
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
                         <div style={{ display: 'flex', gap: '30px', flexWrap: 'wrap', justifyContent: 'center' }}>
                             <Link href="/about" style={{ color: 'white', opacity: 0.8, textDecoration: 'none' }}>About Us</Link>
+                            <Link href="/resources" style={{ color: 'white', opacity: 0.8, textDecoration: 'none' }}>Career Resources</Link>
                             <Link href="/contact" style={{ color: 'white', opacity: 0.8, textDecoration: 'none' }}>Contact</Link>
                             <Link href="/privacy" style={{ color: 'white', opacity: 0.8, textDecoration: 'none' }}>Privacy Policy</Link>
                         </div>

@@ -14,11 +14,12 @@ export default function Navbar() {
                     {!loading && (!user || user.role !== 'employer') && (
                         <Link href="/jobs" className="btn btn-secondary" style={{ border: 'none' }}>Find Internships</Link>
                     )}
+                    <Link href="/resources" className="btn btn-secondary" style={{ border: 'none' }}>Career Tips</Link>
                     <Link href="/employers" className="btn btn-secondary" style={{ border: 'none' }}>For Employers</Link>
 
                     {user ? (
                         <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                            {user.role === 'student' && (
+                            {user.role === 'intern' && (
                                 <>
                                     <Link href="/my-applications" className="btn btn-secondary" style={{ border: 'none' }}>
                                         My Applications
@@ -31,7 +32,7 @@ export default function Navbar() {
                                     </Link>
                                 </>
                             )}
-                            <Link href={user.role === 'student' ? '/intern/dashboard' : '/employer/dashboard'} style={{ textDecoration: 'none' }}>
+                            <Link href={user.role === 'intern' ? '/intern/dashboard' : '/employer/dashboard'} style={{ textDecoration: 'none' }}>
                                 <span style={{ fontWeight: '600', color: '#0032A0', cursor: 'pointer' }}>Hi, {user.name}</span>
                             </Link>
                             <button onClick={logout} className="btn btn-secondary" style={{ fontSize: '0.9rem', padding: '8px 15px' }}>

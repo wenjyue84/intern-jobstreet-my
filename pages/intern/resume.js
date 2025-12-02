@@ -23,7 +23,7 @@ export default function Resume() {
     useEffect(() => {
         if (!user) {
             router.push('/login?redirect=/intern/resume');
-        } else if (user.role !== 'student') {
+        } else if (user.role !== 'intern') {
             router.push('/');
         } else {
             fetchResume();

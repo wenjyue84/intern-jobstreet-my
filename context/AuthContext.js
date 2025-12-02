@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { supabase } from '../lib/supabaseClient';
 
 const AuthContext = createContext();
 
@@ -9,66 +10,77 @@ export function AuthProvider({ children }) {
     const router = useRouter();
 
     useEffect(() => {
-        // Check local storage on initial load for current session
-        const storedUser = localStorage.getItem('currentUser');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-        setLoading(false);
-    }, []);
-
-    const login = (email, password) => {
-        console.log('Attempting login with:', email);
-
-        // Retrieve all registered users
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        const foundUser = users.find(u => u.email === email && u.password === password);
-
-        if (foundUser) {
-            console.log('Login successful, setting user:', foundUser);
-            // Don't store password in current user session
-            const { password, ...userWithoutPassword } = foundUser;
-            setUser(userWithoutPassword);
-            localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
-            return true;
-        }
-
-        console.log('Login failed: invalid credentials');
-        return false;
-    };
-
-    const signup = (name, email, password, role) => {
-        // Retrieve all registered users
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-
-        // Check if user already exists
-        if (users.some(u => u.email === email)) {
-            console.log('Signup failed: User already exists');
-            return false;
-        }
-
-        const newUser = {
-            id: Date.now().toString(),
-            name,
-            email,
-            password, // In a real app, never store plain text passwords!
-            role // 'student' or 'employer'
+        // Check active session
+        const getSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+                setUser(formatUser(session.user));
+            }
+            setLoading(false);
         };
 
-        // Save to users list
-        users.push(newUser);
-        localStorage.setItem('users', JSON.stringify(users));
+        getSession();
 
-        // Set as current user
-        const { password: _, ...userWithoutPassword } = newUser;
-        setUser(userWithoutPassword);
-        localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
-        return true;
+        // Listen for changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session?.user) {
+                setUser(formatUser(session.user));
+            } else {
+                setUser(null);
+            }
+            setLoading(false);
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    const formatUser = (supabaseUser) => {
+        return {
+            id: supabaseUser.id,
+            email: supabaseUser.email,
+            name: supabaseUser.user_metadata?.name,
+            role: supabaseUser.user_metadata?.role,
+            ...supabaseUser
+        };
     };
 
-    const logout = () => {
+    const login = async (email, password) => {
+        console.log('AuthContext: login called with', email);
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+        console.log('AuthContext: supabase result', { data, error });
+
+        if (error) {
+            console.error('Login error:', error.message);
+            return { success: false, error: error.message };
+        }
+        return { success: true, data };
+    };
+
+    const signup = async (name, email, password, role) => {
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: {
+                    name,
+                    role,
+                },
+            },
+        });
+
+        if (error) {
+            console.error('Signup error:', error.message);
+            return { success: false, error: error.message };
+        }
+        return { success: true, data };
+    };
+
+    const logout = async () => {
+        await supabase.auth.signOut();
         setUser(null);
-        localStorage.removeItem('currentUser');
         router.push('/');
     };
 
