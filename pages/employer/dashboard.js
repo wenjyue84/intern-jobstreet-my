@@ -106,6 +106,11 @@ export default function EmployerDashboard() {
                                     Post a New Job
                                 </button>
                             </Link>
+                            <Link href="/employer/profile">
+                                <button className="btn btn-secondary" style={{ width: '100%', marginBottom: '10px', border: '1px solid #ddd' }}>
+                                    Edit Company Profile
+                                </button>
+                            </Link>
                             <button
                                 onClick={logout}
                                 className="btn btn-secondary"

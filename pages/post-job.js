@@ -23,8 +23,32 @@ export default function PostJob() {
         } else if (user.role === 'student') {
             // Redirect students if they shouldn't post jobs
             router.push('/');
+        } else {
+            // Fetch company details to pre-fill form
+            fetchCompanyDetails();
         }
     }, [user, router]);
+
+    const fetchCompanyDetails = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('companies')
+                .select('name, location')
+                .eq('email', user.email)
+                .single();
+
+            if (data) {
+                setFormData(prev => ({
+                    ...prev,
+                    company: data.name || prev.company,
+                    location: data.location || prev.location
+                }));
+            }
+        } catch (error) {
+            // Ignore error if profile doesn't exist
+            console.log('No company profile found or error fetching:', error);
+        }
+    };
 
     const handleChange = (e) => {
         setFormData({

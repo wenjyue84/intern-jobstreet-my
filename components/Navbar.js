@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
-    const { user, logout } = useAuth();
+    const { user, logout, loading } = useAuth();
 
     return (
         <nav className="navbar">
@@ -11,7 +11,9 @@ export default function Navbar() {
                     Intern<span>My</span>
                 </Link>
                 <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                    <Link href="/jobs" className="btn btn-secondary" style={{ border: 'none' }}>Find Internships</Link>
+                    {!loading && (!user || user.role !== 'employer') && (
+                        <Link href="/jobs" className="btn btn-secondary" style={{ border: 'none' }}>Find Internships</Link>
+                    )}
                     <Link href="/employers" className="btn btn-secondary" style={{ border: 'none' }}>For Employers</Link>
 
                     {user ? (
