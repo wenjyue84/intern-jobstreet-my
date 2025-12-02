@@ -4,7 +4,6 @@ import { supabase } from '../../lib/supabaseClient';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
-
 import { MOCK_JOBS } from '../../lib/data';
 
 export default function JobDetail() {
@@ -14,30 +13,103 @@ export default function JobDetail() {
     const [job, setJob] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isSaved, setIsSaved] = useState(false);
+    const [hasApplied, setHasApplied] = useState(false);
+    const [applying, setApplying] = useState(false);
 
     useEffect(() => {
-        if (user && id) {
-            const savedJobs = JSON.parse(localStorage.getItem(`savedJobs_${user.email}`)) || [];
-            setIsSaved(savedJobs.includes(id));
+        if (user && user.role === 'employer') {
+            router.push('/post-job');
+            return;
         }
-    }, [user, id]);
 
-    const handleSave = () => {
+        if (user && id) {
+            // Check saved status
+            const checkSavedStatus = async () => {
+                try {
+                    const { data } = await supabase
+                        .from('saved_jobs')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .eq('job_id', id)
+                        .maybeSingle();
+
+                    if (data) setIsSaved(true);
+                } catch (error) {
+                    console.error('Error checking saved status:', error);
+                }
+            };
+            checkSavedStatus();
+
+            // Check if already applied
+            const checkApplication = async () => {
+                const { data } = await supabase
+                    .from('applications')
+                    .select('id')
+                    .eq('job_id', id)
+                    .eq('user_email', user.email)
+                    .maybeSingle();
+
+                if (data) {
+                    setHasApplied(true);
+                }
+            };
+            checkApplication();
+        }
+    }, [user, id, router]);
+
+    const handleSave = async () => {
         if (!user) {
             router.push(`/login?redirect=${encodeURIComponent(router.asPath)}`);
             return;
         }
 
-        const savedJobs = JSON.parse(localStorage.getItem(`savedJobs_${user.email}`)) || [];
+        try {
+            if (isSaved) {
+                const { error } = await supabase
+                    .from('saved_jobs')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('job_id', id);
 
-        if (isSaved) {
-            const newSavedJobs = savedJobs.filter(jobId => jobId !== id);
-            localStorage.setItem(`savedJobs_${user.email}`, JSON.stringify(newSavedJobs));
-            setIsSaved(false);
-        } else {
-            savedJobs.push(id);
-            localStorage.setItem(`savedJobs_${user.email}`, JSON.stringify(savedJobs));
-            setIsSaved(true);
+                if (error) throw error;
+                setIsSaved(false);
+            } else {
+                const { error } = await supabase
+                    .from('saved_jobs')
+                    .insert([{ user_id: user.id, job_id: id }]);
+
+                if (error) throw error;
+                setIsSaved(true);
+            }
+        } catch (error) {
+            console.error('Error toggling save:', error);
+            alert('Failed to update saved jobs. Please try again.');
+        }
+    };
+
+    const handleApply = async () => {
+        if (!user) {
+            router.push(`/login?redirect=${encodeURIComponent(router.asPath)}`);
+            return;
+        }
+
+        setApplying(true);
+        try {
+            const { error } = await supabase
+                .from('applications')
+                .insert([
+                    { job_id: id, user_email: user.email }
+                ]);
+
+            if (error) throw error;
+
+            setHasApplied(true);
+            alert('Application submitted successfully!');
+        } catch (error) {
+            console.error('Error applying:', error);
+            alert('Failed to submit application. Please try again.');
+        } finally {
+            setApplying(false);
         }
     };
 
@@ -60,7 +132,7 @@ export default function JobDetail() {
                     if (data) {
                         setJob({
                             ...data,
-                            postedAt: new Date(data.posted_at).toLocaleDateString(),
+                            postedAt: new Date(data.created_at).toLocaleDateString(),
                             tags: Array.isArray(data.tags) ? data.tags : (data.tags ? data.tags.split(',') : [])
                         });
                     }
@@ -150,16 +222,17 @@ export default function JobDetail() {
                         </p>
                         <button
                             className="btn btn-primary"
-                            style={{ width: '100%', padding: '15px', fontSize: '1.1rem' }}
-                            onClick={() => {
-                                if (!user) {
-                                    router.push(`/login?redirect=${encodeURIComponent(router.asPath)}`);
-                                } else {
-                                    alert('Application submitted successfully! (Mock)');
-                                }
+                            style={{
+                                width: '100%',
+                                padding: '15px',
+                                fontSize: '1.1rem',
+                                opacity: (hasApplied || applying) ? 0.7 : 1,
+                                cursor: (hasApplied || applying) ? 'not-allowed' : 'pointer'
                             }}
+                            onClick={handleApply}
+                            disabled={hasApplied || applying}
                         >
-                            Apply Now 🚀
+                            {hasApplied ? 'Applied ✓' : (applying ? 'Applying...' : 'Apply Now 🚀')}
                         </button>
                         <button
                             className={`btn ${isSaved ? 'btn-primary' : 'btn-secondary'}`}

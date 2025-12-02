@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Layout from '../components/Layout';
-import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabaseClient';
+import Layout from '../../../components/Layout';
+import { useAuth } from '../../../context/AuthContext';
+import { supabase } from '../../../lib/supabaseClient';
 
-export default function PostJob() {
-    const { user } = useAuth();
+export default function EditJob() {
+    const { user, loading: authLoading } = useAuth();
     const router = useRouter();
-    const [loading, setLoading] = useState(false);
+    const { id } = router.query;
+    const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         company: '',
@@ -18,13 +20,55 @@ export default function PostJob() {
     });
 
     useEffect(() => {
+        if (authLoading) return;
+
         if (!user) {
-            router.push('/login?redirect=/post-job');
-        } else if (user.role === 'student') {
-            // Redirect students if they shouldn't post jobs
-            router.push('/');
+            router.push('/login');
+            return;
         }
-    }, [user, router]);
+
+        if (user.role !== 'employer') {
+            router.push('/');
+            return;
+        }
+
+        if (id) {
+            fetchJobDetails();
+        }
+    }, [user, authLoading, router, id]);
+
+    const fetchJobDetails = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('jobs')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error) throw error;
+
+            // Verify ownership
+            if (data.employer_email !== user.email) {
+                alert('You are not authorized to edit this job.');
+                router.push('/employer/dashboard');
+                return;
+            }
+
+            setFormData({
+                title: data.title,
+                company: data.company,
+                location: data.location,
+                allowance: data.allowance,
+                tags: Array.isArray(data.tags) ? data.tags.join(', ') : data.tags,
+                description: data.description
+            });
+        } catch (error) {
+            console.error('Error fetching job details:', error);
+            alert('Error fetching job details');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleChange = (e) => {
         setFormData({
@@ -35,48 +79,44 @@ export default function PostJob() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
+        setSubmitting(true);
 
         try {
             // Convert comma-separated tags to array
             const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
 
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('jobs')
-                .insert([
-                    {
-                        title: formData.title,
-                        company: formData.company,
-                        location: formData.location,
-                        allowance: formData.allowance,
-                        tags: tagsArray,
-                        description: formData.description,
-                        employer_email: user.email,
-                        posted_at: new Date().toISOString()
-                    }
-                ]);
+                .update({
+                    title: formData.title,
+                    company: formData.company,
+                    location: formData.location,
+                    allowance: formData.allowance,
+                    tags: tagsArray,
+                    description: formData.description,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', id);
 
             if (error) throw error;
 
-            alert('Job posted successfully!');
-            router.push('/'); // Redirect to home or job listing page
+            alert('Job updated successfully!');
+            router.push('/employer/dashboard');
         } catch (error) {
-            console.error('Error posting job:', error);
-            alert('Error posting job: ' + error.message);
+            console.error('Error updating job:', error);
+            alert('Error updating job: ' + error.message);
         } finally {
-            setLoading(false);
+            setSubmitting(false);
         }
     };
 
-    if (!user) {
-        return null; // Or a loading spinner while redirecting
-    }
+    if (loading) return <Layout><div className="container" style={{ padding: '50px', textAlign: 'center' }}>Loading...</div></Layout>;
 
     return (
         <Layout>
             <div className="container" style={{ padding: '40px 0', maxWidth: '800px' }}>
                 <div className="glass-card" style={{ padding: '40px', background: 'white' }}>
-                    <h1 style={{ textAlign: 'center', marginBottom: '30px', color: '#0032A0' }}>Post a New Job</h1>
+                    <h1 style={{ textAlign: 'center', marginBottom: '30px', color: '#0032A0' }}>Edit Job Posting</h1>
 
                     <form onSubmit={handleSubmit}>
                         <div style={{ marginBottom: '20px' }}>
@@ -89,7 +129,6 @@ export default function PostJob() {
                                 style={{ width: '100%' }}
                                 value={formData.title}
                                 onChange={handleChange}
-                                placeholder="e.g. Software Engineering Intern"
                             />
                         </div>
 
@@ -104,7 +143,6 @@ export default function PostJob() {
                                     style={{ width: '100%' }}
                                     value={formData.company}
                                     onChange={handleChange}
-                                    placeholder="e.g. Tech Corp"
                                 />
                             </div>
                             <div>
@@ -117,7 +155,6 @@ export default function PostJob() {
                                     style={{ width: '100%' }}
                                     value={formData.location}
                                     onChange={handleChange}
-                                    placeholder="e.g. Kuala Lumpur"
                                 />
                             </div>
                         </div>
@@ -133,7 +170,6 @@ export default function PostJob() {
                                     style={{ width: '100%' }}
                                     value={formData.allowance}
                                     onChange={handleChange}
-                                    placeholder="e.g. 1,000 - 1,500"
                                 />
                             </div>
                             <div>
@@ -145,7 +181,6 @@ export default function PostJob() {
                                     style={{ width: '100%' }}
                                     value={formData.tags}
                                     onChange={handleChange}
-                                    placeholder="e.g. React, Node.js, Design"
                                 />
                             </div>
                         </div>
@@ -159,18 +194,27 @@ export default function PostJob() {
                                 style={{ width: '100%', minHeight: '150px', fontFamily: 'inherit' }}
                                 value={formData.description}
                                 onChange={handleChange}
-                                placeholder="Describe the role, responsibilities, and requirements..."
                             />
                         </div>
 
-                        <button
-                            type="submit"
-                            className="btn btn-primary"
-                            style={{ width: '100%', padding: '15px', fontSize: '1.1rem' }}
-                            disabled={loading}
-                        >
-                            {loading ? 'Posting...' : 'Post Job'}
-                        </button>
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                            <button
+                                type="button"
+                                onClick={() => router.push('/employer/dashboard')}
+                                className="btn btn-secondary"
+                                style={{ width: '100%', padding: '15px', fontSize: '1.1rem' }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
+                                style={{ width: '100%', padding: '15px', fontSize: '1.1rem' }}
+                                disabled={submitting}
+                            >
+                                {submitting ? 'Saving...' : 'Save Changes'}
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>

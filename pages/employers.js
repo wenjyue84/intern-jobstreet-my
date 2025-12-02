@@ -3,10 +3,18 @@ import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
+import { useEffect } from 'react';
 
 export default function Employers() {
     const { user } = useAuth();
     const router = useRouter();
+
+    useEffect(() => {
+        if (user && user.role === 'student') {
+            router.push('/');
+        }
+    }, [user, router]);
+
     return (
         <Layout>
             <Head>

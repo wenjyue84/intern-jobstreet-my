@@ -3,13 +3,23 @@ import Layout from '../components/Layout';
 import JobCard from '../components/JobCard';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'next/router';
 
 import { MOCK_JOBS } from '../lib/data';
 
 export default function Home() {
+    const { user } = useAuth();
+    const router = useRouter();
     const [searchTerm, setSearchTerm] = useState('');
     const [locationTerm, setLocationTerm] = useState('');
     const [jobs, setJobs] = useState(MOCK_JOBS);
+
+    useEffect(() => {
+        if (user && user.role === 'employer') {
+            router.push('/employers');
+        }
+    }, [user, router]);
 
     useEffect(() => {
         const fetchJobs = async () => {

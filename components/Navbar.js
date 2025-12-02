@@ -16,7 +16,22 @@ export default function Navbar() {
 
                     {user ? (
                         <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                            <span style={{ fontWeight: '600', color: '#0032A0' }}>Hi, {user.name}</span>
+                            {user.role === 'student' && (
+                                <>
+                                    <Link href="/my-applications" className="btn btn-secondary" style={{ border: 'none' }}>
+                                        My Applications
+                                    </Link>
+                                    <Link href="/saved-jobs" className="btn btn-secondary" style={{ border: 'none' }}>
+                                        Saved Jobs
+                                    </Link>
+                                    <Link href="/intern/resume" className="btn btn-secondary" style={{ border: 'none' }}>
+                                        My Resume
+                                    </Link>
+                                </>
+                            )}
+                            <Link href={user.role === 'student' ? '/intern/dashboard' : '/employer/dashboard'} style={{ textDecoration: 'none' }}>
+                                <span style={{ fontWeight: '600', color: '#0032A0', cursor: 'pointer' }}>Hi, {user.name}</span>
+                            </Link>
                             <button onClick={logout} className="btn btn-secondary" style={{ fontSize: '0.9rem', padding: '8px 15px' }}>
                                 Logout
                             </button>
