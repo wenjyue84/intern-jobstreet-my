@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
@@ -11,6 +11,12 @@ export default function Signup() {
     const [role, setRole] = useState('student'); // 'student' or 'employer'
     const { signup } = useAuth();
     const router = useRouter();
+
+    useEffect(() => {
+        if (router.query.role === 'employer' || router.query.role === 'student') {
+            setRole(router.query.role);
+        }
+    }, [router.query]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
