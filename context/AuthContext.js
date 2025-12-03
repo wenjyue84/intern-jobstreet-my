@@ -14,7 +14,13 @@ export function AuthProvider({ children }) {
         const getSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session?.user) {
-                setUser(formatUser(session.user));
+                const formattedUser = formatUser(session.user);
+                setUser(formattedUser);
+
+                // Redirect to onboarding if no role (and not already there)
+                if (!formattedUser.role && router.pathname !== '/onboarding') {
+                    router.push('/onboarding');
+                }
             }
             setLoading(false);
         };
@@ -24,7 +30,13 @@ export function AuthProvider({ children }) {
         // Listen for changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             if (session?.user) {
-                setUser(formatUser(session.user));
+                const formattedUser = formatUser(session.user);
+                setUser(formattedUser);
+
+                // Redirect to onboarding if no role (and not already there)
+                if (!formattedUser.role && router.pathname !== '/onboarding') {
+                    router.push('/onboarding');
+                }
             } else {
                 setUser(null);
             }
@@ -32,7 +44,7 @@ export function AuthProvider({ children }) {
         });
 
         return () => subscription.unsubscribe();
-    }, []);
+    }, [router.pathname]);
 
     const formatUser = (supabaseUser) => {
         return {
@@ -84,20 +96,44 @@ export function AuthProvider({ children }) {
         return { success: true, data, requiresVerification: false };
     };
 
-    const loginWithGoogle = async (role = 'intern') => {
+    const updateRole = async (role) => {
+        if (!user) return { success: false, error: 'No user logged in' };
+
+        const { data, error } = await supabase.auth.updateUser({
+            data: { role: role }
+        });
+
+        if (error) {
+            console.error('Update role error:', error.message);
+            return { success: false, error: error.message };
+        }
+
+        // Update local state
+        setUser(formatUser(data.user));
+        return { success: true, data };
+    };
+
+    const loginWithGoogle = async (role = null) => {
+        const options = {
+            queryParams: {
+                access_type: 'offline',
+                prompt: 'consent',
+            },
+            redirectTo: `${window.location.origin}/`,
+        };
+
+        // Only pass role if explicitly provided (e.g. from Signup page)
+        // Otherwise, leave it null so we can detect new users in Onboarding
+        if (role) {
+            options.data = { role };
+        }
+
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: {
-                queryParams: {
-                    access_type: 'offline',
-                    prompt: 'consent',
-                },
-                redirectTo: `${window.location.origin}/`,
-                data: {
-                    role: role, // Pass role metadata for new users
-                }
-            },
+            options: options,
         });
+
+        console.log('Google login redirect URL:', `${window.location.origin}/`);
 
         if (error) {
             console.error('Google login error:', error.message);
@@ -114,7 +150,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, signup, loginWithGoogle, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, signup, loginWithGoogle, logout, updateRole }}>
             {children}
         </AuthContext.Provider>
     );
