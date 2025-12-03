@@ -14,7 +14,7 @@ export default function Signup() {
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
-    const { signup } = useAuth();
+    const { signup, loginWithGoogle } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
@@ -222,6 +222,34 @@ export default function Signup() {
                                     {loading ? 'Creating Account...' : 'Create Account'}
                                 </button>
                             </form>
+
+                            <div style={{ margin: '20px 0', textAlign: 'center', position: 'relative' }}>
+                                <hr style={{ border: 'none', borderTop: '1px solid #eee' }} />
+                                <span style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', background: 'white', padding: '0 10px', color: '#666', fontSize: '0.9rem' }}>OR</span>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => loginWithGoogle(role)}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    fontSize: '1rem',
+                                    background: 'white',
+                                    border: '1px solid #ddd',
+                                    borderRadius: '8px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '10px',
+                                    cursor: 'pointer',
+                                    color: '#333',
+                                    marginBottom: '20px'
+                                }}
+                            >
+                                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style={{ width: '20px', height: '20px' }} />
+                                Sign up with Google as {role === 'intern' ? 'Intern' : 'Employer'}
+                            </button>
                         </>
                     )}
 

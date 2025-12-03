@@ -7,7 +7,7 @@ import Link from 'next/link';
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { login } = useAuth();
+    const { login, loginWithGoogle } = useAuth();
     const router = useRouter();
 
     const handleSubmit = async (e) => {
@@ -66,6 +66,34 @@ export default function Login() {
                             Login
                         </button>
                     </form>
+
+                    <div style={{ margin: '20px 0', textAlign: 'center', position: 'relative' }}>
+                        <hr style={{ border: 'none', borderTop: '1px solid #eee' }} />
+                        <span style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', background: 'white', padding: '0 10px', color: '#666', fontSize: '0.9rem' }}>OR</span>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() => loginWithGoogle()}
+                        style={{
+                            width: '100%',
+                            padding: '12px',
+                            fontSize: '1rem',
+                            background: 'white',
+                            border: '1px solid #ddd',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '10px',
+                            cursor: 'pointer',
+                            color: '#333',
+                            marginBottom: '20px'
+                        }}
+                    >
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style={{ width: '20px', height: '20px' }} />
+                        Sign in with Google
+                    </button>
 
                     <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.9rem', color: '#666' }}>
                         Don't have an account? <Link href="/signup" style={{ color: '#0032A0', fontWeight: '600' }}>Sign Up</Link>

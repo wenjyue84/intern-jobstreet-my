@@ -84,6 +84,29 @@ export function AuthProvider({ children }) {
         return { success: true, data, requiresVerification: false };
     };
 
+    const loginWithGoogle = async (role = 'intern') => {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                queryParams: {
+                    access_type: 'offline',
+                    prompt: 'consent',
+                },
+                redirectTo: `${window.location.origin}/`,
+                data: {
+                    role: role, // Pass role metadata for new users
+                }
+            },
+        });
+
+        if (error) {
+            console.error('Google login error:', error.message);
+            return { success: false, error: error.message };
+        }
+
+        return { success: true, data };
+    };
+
     const logout = async () => {
         await supabase.auth.signOut();
         setUser(null);
@@ -91,7 +114,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, signup, loginWithGoogle, logout }}>
             {children}
         </AuthContext.Provider>
     );
