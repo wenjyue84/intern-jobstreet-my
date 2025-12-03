@@ -4,9 +4,17 @@ import { useAuth } from '../context/AuthContext';
 import Head from 'next/head';
 
 export default function Onboarding() {
-    const { user, updateRole } = useAuth();
+    const auth = useAuth();
+    const { user, updateRole } = auth;
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        console.log('Onboarding: useAuth result:', auth);
+        if (!updateRole) {
+            console.error('Onboarding: updateRole is missing from useAuth!');
+        }
+    }, [auth, updateRole]);
 
     useEffect(() => {
         // If user already has a role, redirect them away
