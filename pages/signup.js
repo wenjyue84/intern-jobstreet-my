@@ -8,7 +8,7 @@ export default function Signup() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState('intern'); // 'intern' or 'employer'
+    const [role, setRole] = useState(null); // 'intern' or 'employer'
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -27,6 +27,11 @@ export default function Signup() {
         e.preventDefault();
         setError('');
         setSuccessMessage('');
+
+        if (!role) {
+            setError('Please select whether you are an Intern or an Employer.');
+            return;
+        }
 
         // Basic validation
         if (password.length < 6) {
@@ -248,7 +253,7 @@ export default function Signup() {
                                 }}
                             >
                                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style={{ width: '20px', height: '20px' }} />
-                                Sign up with Google as {role === 'intern' ? 'Intern' : 'Employer'}
+                                {role ? `Sign up with Google as ${role === 'intern' ? 'Intern' : 'Employer'}` : 'Sign up with Google'}
                             </button>
                         </>
                     )}

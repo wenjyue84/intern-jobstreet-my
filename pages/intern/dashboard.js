@@ -154,14 +154,38 @@ export default function Dashboard() {
                             )}
                         </div>
 
-                        {/* Activity Section (Placeholder) */}
+                        {/* Quick Actions Section */}
                         <div className="glass-card" style={{ padding: '30px' }}>
-                            <h3 style={{ marginBottom: '20px', color: '#0032A0' }}>My Activity</h3>
-                            <div style={{ textAlign: 'center', padding: '30px', color: '#666', background: '#f9fafb', borderRadius: '8px' }}>
-                                <p>No recent activity found.</p>
-                                <p style={{ fontSize: '0.9rem' }}>Applied jobs and saved internships will appear here.</p>
-                                <Link href="/jobs">
-                                    <button className="btn btn-primary" style={{ marginTop: '15px' }}>Browse Internships</button>
+                            <h3 style={{ marginBottom: '20px', color: '#0032A0' }}>Quick Actions</h3>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                <Link href="/my-applications" style={{ textDecoration: 'none' }}>
+                                    <div style={{
+                                        padding: '20px',
+                                        background: '#f0f9ff',
+                                        borderRadius: '12px',
+                                        border: '1px solid #bae6fd',
+                                        cursor: 'pointer',
+                                        transition: 'transform 0.2s',
+                                        textAlign: 'center'
+                                    }}>
+                                        <h4 style={{ margin: '0 0 5px', color: '#0284c7' }}>My Applications</h4>
+                                        <p style={{ margin: 0, fontSize: '0.9rem', color: '#64748b' }}>View status of applied jobs</p>
+                                    </div>
+                                </Link>
+
+                                <Link href="/saved-jobs" style={{ textDecoration: 'none' }}>
+                                    <div style={{
+                                        padding: '20px',
+                                        background: '#fdf4ff',
+                                        borderRadius: '12px',
+                                        border: '1px solid #f0abfc',
+                                        cursor: 'pointer',
+                                        transition: 'transform 0.2s',
+                                        textAlign: 'center'
+                                    }}>
+                                        <h4 style={{ margin: '0 0 5px', color: '#c026d3' }}>Saved Jobs</h4>
+                                        <p style={{ margin: 0, fontSize: '0.9rem', color: '#64748b' }}>View your bookmarked jobs</p>
+                                    </div>
                                 </Link>
                             </div>
                         </div>

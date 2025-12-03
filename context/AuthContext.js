@@ -21,6 +21,8 @@ export function AuthProvider({ children }) {
                 if (!formattedUser.role && router.pathname !== '/onboarding') {
                     router.push('/onboarding');
                 }
+            } else {
+                setUser(null);
             }
             setLoading(false);
         };
@@ -48,11 +50,11 @@ export function AuthProvider({ children }) {
 
     const formatUser = (supabaseUser) => {
         return {
+            ...supabaseUser,
             id: supabaseUser.id,
             email: supabaseUser.email,
             name: supabaseUser.user_metadata?.name,
             role: supabaseUser.user_metadata?.role,
-            ...supabaseUser
         };
     };
 
