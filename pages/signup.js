@@ -9,6 +9,11 @@ export default function Signup() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('intern'); // 'intern' or 'employer'
+    const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+
     const { signup } = useAuth();
     const router = useRouter();
 
@@ -20,15 +25,40 @@ export default function Signup() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const { success, error } = await signup(name, email, password, role);
-        if (success) {
-            let redirectPath = router.query.redirect || '/';
-            if (role === 'employer' && !router.query.redirect) {
-                redirectPath = '/employer/profile';
+        setError('');
+        setSuccessMessage('');
+
+        // Basic validation
+        if (password.length < 6) {
+            setError('Password must be at least 6 characters long.');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const { success, error, requiresVerification } = await signup(name, email.trim(), password, role);
+
+            if (success) {
+                if (requiresVerification) {
+                    setSuccessMessage('Account created successfully! Please check your email to verify your account.');
+                    // Optional: Add a note for the developer
+                    console.log('Developer Note: To skip email verification, disable "Confirm email" in your Supabase project settings.');
+                } else {
+                    let redirectPath = router.query.redirect || '/';
+                    if (role === 'employer' && !router.query.redirect) {
+                        redirectPath = '/employer/profile';
+                    }
+                    router.push(redirectPath);
+                }
+            } else {
+                setError(error || 'Signup failed. Please try again.');
             }
-            router.push(redirectPath);
-        } else {
-            alert('Signup failed: ' + error);
+        } catch (err) {
+            setError('An unexpected error occurred.');
+            console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -39,89 +69,161 @@ export default function Signup() {
                     <h1 style={{ textAlign: 'center', marginBottom: '10px', color: '#0032A0' }}>Join InternMy 🇲🇾</h1>
                     <p style={{ textAlign: 'center', marginBottom: '30px', color: '#666' }}>Start your journey today.</p>
 
-                    <div style={{ display: 'flex', background: '#f0f0f0', padding: '5px', borderRadius: '8px', marginBottom: '30px' }}>
-                        <button
-                            type="button"
-                            onClick={() => setRole('intern')}
-                            style={{
-                                flex: 1,
-                                padding: '10px',
-                                border: 'none',
-                                borderRadius: '6px',
-                                background: role === 'intern' ? 'white' : 'transparent',
-                                color: role === 'intern' ? '#0032A0' : '#666',
-                                fontWeight: role === 'intern' ? '600' : '400',
-                                boxShadow: role === 'intern' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s'
-                            }}
-                        >
-                            Intern
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setRole('employer')}
-                            style={{
-                                flex: 1,
-                                padding: '10px',
-                                border: 'none',
-                                borderRadius: '6px',
-                                background: role === 'employer' ? 'white' : 'transparent',
-                                color: role === 'employer' ? '#0032A0' : '#666',
-                                fontWeight: role === 'employer' ? '600' : '400',
-                                boxShadow: role === 'employer' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s'
-                            }}
-                        >
-                            Employer
-                        </button>
-                    </div>
-
-                    <form onSubmit={handleSubmit}>
-                        <div style={{ marginBottom: '20px' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Full Name</label>
-                            <input
-                                type="text"
-                                required
-                                className="search-input"
-                                style={{ width: '100%' }}
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder="Ali bin Abu"
-                            />
+                    {error && (
+                        <div style={{
+                            background: '#ffebee',
+                            color: '#c62828',
+                            padding: '12px',
+                            borderRadius: '8px',
+                            marginBottom: '20px',
+                            fontSize: '0.9rem',
+                            border: '1px solid #ef9a9a'
+                        }}>
+                            <strong>Error:</strong> {error}
                         </div>
+                    )}
 
-                        <div style={{ marginBottom: '20px' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Email Address</label>
-                            <input
-                                type="email"
-                                required
-                                className="search-input"
-                                style={{ width: '100%' }}
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="intern@university.edu.my"
-                            />
+                    {successMessage && (
+                        <div style={{
+                            background: '#e8f5e9',
+                            color: '#2e7d32',
+                            padding: '12px',
+                            borderRadius: '8px',
+                            marginBottom: '20px',
+                            fontSize: '0.9rem',
+                            border: '1px solid #a5d6a7'
+                        }}>
+                            {successMessage}
+                            <div style={{ marginTop: '10px', fontSize: '0.8rem', color: '#555', fontStyle: 'italic' }}>
+                                Note: If you are the developer, you can disable email verification in your Supabase dashboard to skip this step.
+                            </div>
                         </div>
+                    )}
 
-                        <div style={{ marginBottom: '30px' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Password</label>
-                            <input
-                                type="password"
-                                required
-                                className="search-input"
-                                style={{ width: '100%' }}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                            />
-                        </div>
+                    {!successMessage && (
+                        <>
+                            <div style={{ display: 'flex', background: '#f0f0f0', padding: '5px', borderRadius: '8px', marginBottom: '30px' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => setRole('intern')}
+                                    style={{
+                                        flex: 1,
+                                        padding: '10px',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        background: role === 'intern' ? 'white' : 'transparent',
+                                        color: role === 'intern' ? '#0032A0' : '#666',
+                                        fontWeight: role === 'intern' ? '600' : '400',
+                                        boxShadow: role === 'intern' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    Intern
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setRole('employer')}
+                                    style={{
+                                        flex: 1,
+                                        padding: '10px',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        background: role === 'employer' ? 'white' : 'transparent',
+                                        color: role === 'employer' ? '#0032A0' : '#666',
+                                        fontWeight: role === 'employer' ? '600' : '400',
+                                        boxShadow: role === 'employer' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    Employer
+                                </button>
+                            </div>
 
-                        <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '15px', fontSize: '1.1rem' }}>
-                            Create Account
-                        </button>
-                    </form>
+                            <form onSubmit={handleSubmit}>
+                                <div style={{ marginBottom: '20px' }}>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Full Name</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        className="search-input"
+                                        style={{ width: '100%' }}
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        placeholder="Ali bin Abu"
+                                        disabled={loading}
+                                    />
+                                </div>
+
+                                <div style={{ marginBottom: '20px' }}>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Email Address</label>
+                                    <input
+                                        type="email"
+                                        required
+                                        className="search-input"
+                                        style={{ width: '100%' }}
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="intern@university.edu.my"
+                                        disabled={loading}
+                                    />
+                                </div>
+
+                                <div style={{ marginBottom: '30px' }}>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Password</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            required
+                                            className="search-input"
+                                            style={{ width: '100%' }}
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            placeholder="••••••••"
+                                            disabled={loading}
+                                            minLength={6}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            style={{
+                                                position: 'absolute',
+                                                right: '10px',
+                                                top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                background: 'none',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                color: '#666',
+                                                fontSize: '0.8rem'
+                                            }}
+                                        >
+                                            {showPassword ? "Hide" : "Show"}
+                                        </button>
+                                    </div>
+                                    <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>
+                                        Must be at least 6 characters
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary"
+                                    style={{
+                                        width: '100%',
+                                        padding: '15px',
+                                        fontSize: '1.1rem',
+                                        opacity: loading ? 0.7 : 1,
+                                        cursor: loading ? 'not-allowed' : 'pointer'
+                                    }}
+                                    disabled={loading}
+                                >
+                                    {loading ? 'Creating Account...' : 'Create Account'}
+                                </button>
+                            </form>
+                        </>
+                    )}
 
                     <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.9rem', color: '#666' }}>
                         Already have an account? <Link href="/login" style={{ color: '#0032A0', fontWeight: '600' }}>Login</Link>

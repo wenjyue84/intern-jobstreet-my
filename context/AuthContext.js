@@ -75,7 +75,13 @@ export function AuthProvider({ children }) {
             console.error('Signup error:', error.message);
             return { success: false, error: error.message };
         }
-        return { success: true, data };
+
+        // If signup is successful but no session, it means email verification is required
+        if (data.user && !data.session) {
+            return { success: true, data, requiresVerification: true };
+        }
+
+        return { success: true, data, requiresVerification: false };
     };
 
     const logout = async () => {

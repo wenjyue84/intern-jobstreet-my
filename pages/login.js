@@ -13,7 +13,7 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('Login page: handleSubmit called');
-        const { success, error } = await login(email, password);
+        const { success, error } = await login(email.trim(), password);
         console.log('Login page: login result', { success, error });
         if (success) {
             console.log('Login page: redirecting');
