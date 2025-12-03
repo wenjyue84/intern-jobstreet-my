@@ -21,7 +21,11 @@ export default function Login() {
             router.push(redirectPath);
         } else {
             console.log('Login page: showing alert');
-            alert('Login failed: ' + error);
+            let errorMessage = 'Login failed: ' + error;
+            if (error.includes('Invalid login credentials')) {
+                errorMessage = 'Login failed. Please check your email and password. If you just signed up, make sure you have verified your email address.';
+            }
+            alert(errorMessage);
         }
     };
 
