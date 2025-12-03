@@ -1,7 +1,9 @@
 import Head from 'next/head';
 import Layout from '../../../components/Layout';
 import Link from 'next/link';
-import { EMPLOYER_BLOG_ARTICLES } from '../../../lib/employerBlogData';
+import { BLOG_ARTICLES } from '../../../lib/blogData';
+
+const EMPLOYER_BLOG_ARTICLES = BLOG_ARTICLES.filter(article => article.targetRole === 'employer');
 
 export default function EmployerResources() {
     return (
@@ -22,7 +24,7 @@ export default function EmployerResources() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '30px' }}>
                     {EMPLOYER_BLOG_ARTICLES.map((article) => (
                         <Link
-                            href={`/employer/resources/${article.slug}`}
+                            href={`/resources/${article.slug}`}
                             key={article.id}
                             style={{ textDecoration: 'none', color: 'inherit' }}
                         >

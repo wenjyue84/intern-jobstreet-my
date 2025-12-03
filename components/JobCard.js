@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function JobCard({ job }) {
     return (
@@ -9,10 +10,12 @@ export default function JobCard({ job }) {
                         <h3 className="job-role">{job.title}</h3>
                         <p className="job-company">{job.company}</p>
                     </div>
-                    <img
+                    <Image
                         src={`https://ui-avatars.com/api/?name=${job.company}&background=random`}
                         alt={job.company}
-                        style={{ width: '40px', height: '40px', borderRadius: '8px' }}
+                        width={40}
+                        height={40}
+                        style={{ borderRadius: '8px' }}
                     />
                 </div>
 

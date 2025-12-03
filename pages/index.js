@@ -1,4 +1,4 @@
-import Head from 'next/head';
+import SEOHead from '../components/SEOHead';
 import Layout from '../components/Layout';
 import JobCard from '../components/JobCard';
 import { useState, useEffect } from 'react';
@@ -31,7 +31,7 @@ export default function Home() {
             if (!error && data) {
                 const formattedJobs = data.map(job => ({
                     ...job,
-                    postedAt: new Date(job.posted_at).toLocaleDateString(), // Map posted_at to postedAt
+                    postedAt: new Date(job.posted_at).toLocaleDateString('en-GB'), // Map posted_at to postedAt
                     tags: Array.isArray(job.tags) ? job.tags : (job.tags ? job.tags.split(',') : []) // Ensure tags is array
                 }));
                 setJobs([...formattedJobs, ...MOCK_JOBS]);
@@ -53,10 +53,11 @@ export default function Home() {
 
     return (
         <Layout>
-            <Head>
-                <title>InternMy - Find Top Internships in Malaysia</title>
-                <meta name="description" content="The #1 Internship Portal for Malaysian Students" />
-            </Head>
+            <SEOHead
+                title="InternMy - Find Top Internships in Malaysia"
+                description="The #1 Internship Portal for Malaysian Students"
+                url="https://internmy.com"
+            />
 
             {/* Hero Section */}
             <section className="hero">

@@ -129,7 +129,7 @@ export default function JobApplicants() {
                                                 {applicant.resume ? applicant.resume.full_name : applicant.user_email}
                                             </h3>
                                             <p style={{ margin: '0 0 10px 0', color: '#666' }}>
-                                                Applied on {new Date(applicant.applied_at).toLocaleDateString()}
+                                                Applied on {new Date(applicant.applied_at).toLocaleDateString('en-GB')}
                                             </p>
 
                                             {applicant.resume && (

@@ -3,15 +3,15 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '../../context/AuthContext';
 import { MOCK_JOBS } from '../../lib/data';
+import SEOHead from '../../components/SEOHead';
 
-export default function JobDetail() {
+export default function JobDetail({ job }) {
     const router = useRouter();
     const { id } = router.query;
     const { user } = useAuth();
-    const [job, setJob] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [isSaved, setIsSaved] = useState(false);
     const [hasApplied, setHasApplied] = useState(false);
     const [applying, setApplying] = useState(false);
@@ -22,7 +22,7 @@ export default function JobDetail() {
             return;
         }
 
-        if (user && id) {
+        if (user && job) {
             // Check saved status
             const checkSavedStatus = async () => {
                 try {
@@ -30,7 +30,7 @@ export default function JobDetail() {
                         .from('saved_jobs')
                         .select('*')
                         .eq('user_id', user.id)
-                        .eq('job_id', id)
+                        .eq('job_id', job.id)
                         .maybeSingle();
 
                     if (data) setIsSaved(true);
@@ -45,7 +45,7 @@ export default function JobDetail() {
                 const { data } = await supabase
                     .from('applications')
                     .select('id')
-                    .eq('job_id', id)
+                    .eq('job_id', job.id)
                     .eq('user_email', user.email)
                     .maybeSingle();
 
@@ -55,7 +55,7 @@ export default function JobDetail() {
             };
             checkApplication();
         }
-    }, [user, id, router]);
+    }, [user, job, router]);
 
     const handleSave = async () => {
         if (!user) {
@@ -69,14 +69,14 @@ export default function JobDetail() {
                     .from('saved_jobs')
                     .delete()
                     .eq('user_id', user.id)
-                    .eq('job_id', id);
+                    .eq('job_id', job.id);
 
                 if (error) throw error;
                 setIsSaved(false);
             } else {
                 const { error } = await supabase
                     .from('saved_jobs')
-                    .insert([{ user_id: user.id, job_id: id }]);
+                    .insert([{ user_id: user.id, job_id: job.id }]);
 
                 if (error) throw error;
                 setIsSaved(true);
@@ -98,7 +98,7 @@ export default function JobDetail() {
             const { error } = await supabase
                 .from('applications')
                 .insert([
-                    { job_id: id, user_email: user.email }
+                    { job_id: job.id, user_email: user.email }
                 ]);
 
             if (error) throw error;
@@ -113,40 +113,7 @@ export default function JobDetail() {
         }
     };
 
-    useEffect(() => {
-        if (!id) return;
-
-        const foundMock = MOCK_JOBS.find(j => j.id.toString() === id);
-        if (foundMock) {
-            setJob(foundMock);
-            setLoading(false);
-        } else {
-            const fetchJob = async () => {
-                try {
-                    const { data, error } = await supabase
-                        .from('jobs')
-                        .select('*')
-                        .eq('id', id)
-                        .single();
-
-                    if (data) {
-                        setJob({
-                            ...data,
-                            postedAt: new Date(data.created_at).toLocaleDateString(),
-                            tags: Array.isArray(data.tags) ? data.tags : (data.tags ? data.tags.split(',') : [])
-                        });
-                    }
-                } catch (error) {
-                    console.error('Error fetching job:', error);
-                } finally {
-                    setLoading(false);
-                }
-            };
-            fetchJob();
-        }
-    }, [id]);
-
-    if (loading) {
+    if (router.isFallback) {
         return (
             <Layout>
                 <div className="container" style={{ padding: '100px 0', textAlign: 'center' }}>
@@ -169,6 +136,13 @@ export default function JobDetail() {
 
     return (
         <Layout>
+            <SEOHead
+                title={`${job.title} at ${job.company} | InternMy`}
+                description={job.description ? `${job.description.substring(0, 160)}...` : `Internship opportunity at ${job.company}`}
+                url={`https://internmy.com/jobs/${job.id}`}
+                ogImage={`https://ui-avatars.com/api/?name=${job.company}&background=random&size=128`}
+                type="article"
+            />
             <div style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '40px 0' }}>
                 <div className="container">
                     <Link href="/" style={{ color: '#666', marginBottom: '20px', display: 'inline-block' }}>&larr; Back to Jobs</Link>
@@ -182,9 +156,11 @@ export default function JobDetail() {
                                 <span>🕒 {job.postedAt}</span>
                             </div>
                         </div>
-                        <img
+                        <Image
                             src={`https://ui-avatars.com/api/?name=${job.company}&background=random&size=128`}
                             alt={job.company}
+                            width={128}
+                            height={128}
                             style={{ borderRadius: '16px' }}
                         />
                     </div>
@@ -247,3 +223,51 @@ export default function JobDetail() {
         </Layout>
     );
 }
+
+export async function getServerSideProps({ params }) {
+    const { id } = params;
+
+    // 1. Check Mock Data first
+    const foundMock = MOCK_JOBS.find(j => j.id.toString() === id);
+    if (foundMock) {
+        return {
+            props: {
+                job: foundMock
+            }
+        };
+    }
+
+    // 2. Check Supabase
+    try {
+        const { data, error } = await supabase
+            .from('jobs')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error || !data) {
+            return {
+                notFound: true
+            };
+        }
+
+        const formattedJob = {
+            ...data,
+            postedAt: new Date(data.created_at).toLocaleDateString('en-GB'),
+            tags: Array.isArray(data.tags) ? data.tags : (data.tags ? data.tags.split(',') : [])
+        };
+
+        return {
+            props: {
+                job: formattedJob
+            }
+        };
+
+    } catch (error) {
+        console.error('Error fetching job:', error);
+        return {
+            notFound: true
+        };
+    }
+}
+

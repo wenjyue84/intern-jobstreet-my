@@ -1,13 +1,15 @@
 import Layout from '../components/Layout';
-import Head from 'next/head';
+import SEOHead from '../components/SEOHead';
 
 export default function About() {
     return (
         <Layout>
-            <Head>
-                <title>About Us - InternMy Malaysia</title>
-                <meta name="description" content="Learn more about Prisma Technology Solution Sdn. Bhd., the developer behind InternMy Malaysia." />
-            </Head>
+            <SEOHead
+                title="About Us - InternMy Malaysia"
+                description="Learn more about Prisma Technology Solution Sdn. Bhd., the developer behind InternMy Malaysia."
+                url="https://internmy.com/about"
+                keywords="about internmy, prisma technology solution, internship platform malaysia, company profile"
+            />
 
             <div className="hero">
                 <div className="container">

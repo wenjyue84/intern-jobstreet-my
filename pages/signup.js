@@ -3,6 +3,7 @@ import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Signup() {
     const [name, setName] = useState('');
@@ -252,7 +253,7 @@ export default function Signup() {
                                     marginBottom: '20px'
                                 }}
                             >
-                                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style={{ width: '20px', height: '20px' }} />
+                                <Image src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" width={20} height={20} />
                                 {role ? `Sign up with Google as ${role === 'intern' ? 'Intern' : 'Employer'}` : 'Sign up with Google'}
                             </button>
                         </>

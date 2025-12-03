@@ -1,7 +1,9 @@
 import Head from 'next/head';
 import Layout from '../../../components/Layout';
 import { useRouter } from 'next/router';
-import { EMPLOYER_BLOG_ARTICLES } from '../../../lib/employerBlogData';
+import { BLOG_ARTICLES } from '../../../lib/blogData';
+
+const EMPLOYER_BLOG_ARTICLES = BLOG_ARTICLES.filter(article => article.targetRole === 'employer');
 import Link from 'next/link';
 
 export default function EmployerArticle() {

@@ -1,123 +1,38 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
-const JOBS_TO_SEED = [
-    {
-        companyName: 'Coway Malaysia',
-        email: 'coway.my@example.com',
-        jobTitle: 'Telemarketing (Full Time)',
-        location: 'Batu Pahat | Muar | Johor Bahru',
-        allowance: 'RM3,000 – RM5,000',
-        tags: ['Sales', 'Marketing', 'Full Time'],
-        description: `Nak bina kerjaya dengan pendapatan lumayan dan suasana kerja profesional?
-Jom sertai pasukan Coway Malaysia!
+const COMPANIES = ['TechCorp', 'InnovateMy', 'GreenEnergy', 'FinTech Solutions', 'EduTech', 'HealthPlus', 'LogiTrans', 'BuildIt', 'CreativeMinds', 'Foodie', 'Grab', 'Shopee', 'Lazada', 'Maybank', 'CIMB', 'Petronas', 'Shell', 'Intel', 'Dell', 'Top Glove'];
+const ROLES = ['Software Engineer', 'Marketing Executive', 'Data Analyst', 'Graphic Designer', 'HR Assistant', 'Business Development', 'Content Writer', 'Accountant', 'Project Manager', 'Customer Support', 'UI/UX Designer', 'Sales Executive', 'Operations Intern', 'Social Media Intern', 'IT Support'];
+const LOCATIONS = ['Kuala Lumpur', 'Petaling Jaya', 'Penang', 'Johor Bahru', 'Cyberjaya', 'Subang Jaya', 'Shah Alam', 'Kuching', 'Kota Kinabalu', 'Ipoh', 'Melaka', 'Seremban'];
+const TAGS_POOL = ['Tech', 'Marketing', 'Finance', 'Design', 'Business', 'Engineering', 'Sales', 'HR', 'Operations', 'Remote', 'Hybrid', 'Full Time', 'Internship'];
 
-✅ Umur 18 tahun ke atas
-✅ Tiada pengalaman? Latihan disediakan!
-✅ Boleh belajar & bekerja dalam kumpulan
-✅ Kemasukan segera!
+const generateJobs = (count) => {
+    const jobs = [];
+    for (let i = 0; i < count; i++) {
+        const company = COMPANIES[Math.floor(Math.random() * COMPANIES.length)];
+        const role = ROLES[Math.floor(Math.random() * ROLES.length)];
+        const location = LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)];
+        const tags = [];
+        const numTags = Math.floor(Math.random() * 3) + 1;
+        for (let j = 0; j < numTags; j++) {
+            const tag = TAGS_POOL[Math.floor(Math.random() * TAGS_POOL.length)];
+            if (!tags.includes(tag)) tags.push(tag);
+        }
 
-🕘 Isnin – Jumaat (9.00 pagi – 5.00 petang)
-💰 Gaji RM3,000 – RM5,000 (Basic + Komisyen)
-🎯 Bonus bulanan & insentif menarik`
-    },
-    {
-        companyName: "Permodalan Darul Ta'zim (PDT)",
-        email: 'vacancy@pdt.com.my',
-        jobTitle: 'Latihan Industri (Commercial Dept)',
-        location: 'Johor',
-        allowance: 'Competitive Allowance',
-        tags: ['Finance', 'Investment', 'Corporate'],
-        description: `Kepada pelajar yang berminat dalam kewangan & pelaburan, ini peluang terbaik untuk sertai Jabatan Komersil PDT dan rasai pengalaman sebenar dunia korporat! 🚀
-
-Tanggungjawab Utama:
-📊 Membantu dalam analisis & ulasan penyata kewangan syarikat (AFS).
-📋 Menyediakan pandangan korporat berkaitan mesyuarat lembaga syarikat & anak syarikat.
-🪴 Terlibat dalam due-diligence pelaburan seperti forex, saham & indeks — serta analisis trend pasaran semasa.
-🤝 Melaksanakan tugasan dari Eksekutif Kanan Komersil, Pejabat CFO & Pengurusan Tertinggi.
-
-Faedah Latihan:
-✅ Pengalaman praktikal dalam persekitaran profesional.
-✅ Belajar terus dari profesional berpengalaman.
-✅ Asah kemahiran analisis & komunikasi dalam suasana mencabar.
-✅ Peluang pembangunan & pertumbuhan kerjaya.
-✅ Elaun kompetitif & pasukan kerja yang dinamik.`
-    },
-    {
-        companyName: 'Seetronic',
-        email: 'seetronic@example.com',
-        jobTitle: 'Industrial Cord Sets / RJ45 Connectors',
-        location: 'Johor',
-        allowance: 'Unspecified',
-        tags: ['Engineering', 'Manufacturing', 'Industrial'],
-        description: `High-Quality Industrial Cord Sets
-
-Our IP68-rated connectors deliver flawless performance in any environment. Because connections should be the most reliable part of your system. RJ45 CONNECTORS
-
-In the field of LED display, the launch of 05 Series IP65 waterproof RJ45 connectors provides connection more stable; plugging and unplugging is more convenient. This competitive product which is independently design by Seetronic is highly recognized by industry customers. It is a high-quality RJ45 carrier cable and chassis connectors
-
-Meet the post-90s squad rewriting connection rules!
-
-Since 2016, we've been the "Plug & Play Heroes" – crafting industrial connectors that survive LED raves, robot wars, and even Mars simulations (okay, maybe not Mars... yet). 40+ patents | 500K+ harnesses monthly | Your weirdest custom request? Challenge accepted.`
-    },
-    {
-        companyName: 'Webteq',
-        email: 'admin@webteq.com.my',
-        jobTitle: 'Accounting Intern',
-        location: 'Taman Austin Perdana, Johor Bahru',
-        allowance: 'Unspecified',
-        tags: ['Accounting', 'Internship'],
-        description: `Accounting Intern Intake! - 2 pax
-
-Location: Taman Austin Perdana, Johor Bahru.
-New intake internship placement is available now.
-Available from Dec 2025 onwards.
-
-Contact: +60 12-773 5535 (Ms Amanda)
-Email: admin@webteq.com.my`
-    },
-    {
-        companyName: 'Angsanapuri Development',
-        email: 'hmnrs.md3@gmail.com',
-        jobTitle: 'Business & Admin / Construction Internships',
-        location: 'Temerloh',
-        allowance: 'Unspecified',
-        tags: ['Construction', 'Admin', 'Business', 'Architecture', 'Engineering'],
-        description: `🌟 Peluang Latihan Industri di TEMERLOH! 🌟
-
-ANGSANAPURI DEVELOPMENT SDN BHD (REAL ESTATE DEVELOPER)
-
-WE ARE HIRING - Business & Admin
-Intake: Dec 2025 - Dec 2026
-
-Positions:
-- Graphic Design
-- Marketing
-- Business Management
-- Architecture
-- Interior Design
-- Landscape
-- Human Resources
-- Admin Secretary
-- Multimedia
-- Information Technology
-- Customer Service
-
-WAL FIRST CONSTRUCTION SDN BHD
-
-WE ARE HIRING - Construction
-Intake: Dec 2025 - Dec 2026
-
-Positions:
-- Quantity Surveying
-- Building Surveying
-- Planning & Development
-- Construction Management
-- Civil Engineering
-
-IF INTERESTED, PLEASE SUBMIT YOUR RESUME AND UNIVERSITY DOCUMENTS INCLUDING THE INTERNSHIP PERIOD TO THE CONTACT DETAILS PROVIDED ABOVE (ONLY COMPLETE APPLICATIONS WILL BE PROCESSED)`
+        jobs.push({
+            companyName: company,
+            email: `contact${i}@${company.toLowerCase().replace(/\s/g, '')}.com`,
+            jobTitle: `${role} Intern`,
+            location: location,
+            allowance: `RM${800 + Math.floor(Math.random() * 10) * 100} - RM${1500 + Math.floor(Math.random() * 10) * 100}`,
+            tags: tags,
+            description: `We are looking for a passionate ${role} to join our team at ${company}. \n\nResponsibilities:\n- Assist in daily operations\n- Collaborate with the team\n- Learn and grow with us\n\nRequirements:\n- Currently pursuing a degree/diploma\n- Eager to learn\n- Good communication skills`
+        });
     }
-];
+    return jobs;
+};
+
+const JOBS_TO_SEED = generateJobs(60);
 
 export default function SeedJobs() {
     const [logs, setLogs] = useState([]);

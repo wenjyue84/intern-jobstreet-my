@@ -12,7 +12,9 @@ export default function Jobs() {
     const router = useRouter();
     const [searchTerm, setSearchTerm] = useState('');
     const [locationTerm, setLocationTerm] = useState('');
-    const [jobs, setJobs] = useState(MOCK_JOBS);
+    const [jobs, setJobs] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const jobsPerPage = 9;
 
     useEffect(() => {
         if (user && user.role === 'employer') {
@@ -30,10 +32,10 @@ export default function Jobs() {
             if (!error && data) {
                 const formattedJobs = data.map(job => ({
                     ...job,
-                    postedAt: new Date(job.posted_at).toLocaleDateString(),
+                    postedAt: new Date(job.posted_at).toLocaleDateString('en-GB'),
                     tags: Array.isArray(job.tags) ? job.tags : (job.tags ? job.tags.split(',') : [])
                 }));
-                setJobs([...formattedJobs, ...MOCK_JOBS]);
+                setJobs(formattedJobs);
             }
         };
         fetchJobs();
@@ -49,6 +51,14 @@ export default function Jobs() {
 
         return matchesSearch && matchesLocation;
     });
+
+    // Pagination Logic
+    const indexOfLastJob = currentPage * jobsPerPage;
+    const indexOfFirstJob = indexOfLastJob - jobsPerPage;
+    const currentJobs = filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
+    const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     return (
         <Layout>
@@ -66,26 +76,82 @@ export default function Jobs() {
                         placeholder="Job title, keywords, or company"
                         className="search-input"
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                     />
                     <input
                         type="text"
                         placeholder="Location (e.g. KL, Penang)"
                         className="search-input"
                         value={locationTerm}
-                        onChange={(e) => setLocationTerm(e.target.value)}
+                        onChange={(e) => { setLocationTerm(e.target.value); setCurrentPage(1); }}
                     />
                 </div>
 
                 <div className="job-grid">
-                    {filteredJobs.map(job => (
+                    {currentJobs.map(job => (
                         <JobCard key={job.id} job={job} />
                     ))}
                 </div>
 
-                {filteredJobs.length === 0 && (
+                {filteredJobs.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
                         <p>No internships found matching your criteria.</p>
+                    </div>
+                ) : (
+                    <div className="pagination" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '40px' }}>
+                        <button
+                            onClick={() => paginate(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            style={{
+                                padding: '8px 16px',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                background: currentPage === 1 ? '#f5f5f5' : 'white',
+                                cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
+                            }}
+                        >
+                            Previous
+                        </button>
+
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                            // Logic to show a window of pages around current page
+                            let startPage = Math.max(1, currentPage - 2);
+                            if (startPage + 4 > totalPages) {
+                                startPage = Math.max(1, totalPages - 4);
+                            }
+                            const pageNum = startPage + i;
+
+                            return (
+                                <button
+                                    key={pageNum}
+                                    onClick={() => paginate(pageNum)}
+                                    style={{
+                                        padding: '8px 16px',
+                                        border: '1px solid #ddd',
+                                        borderRadius: '4px',
+                                        background: currentPage === pageNum ? '#0032A0' : 'white',
+                                        color: currentPage === pageNum ? 'white' : 'black',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {pageNum}
+                                </button>
+                            );
+                        })}
+
+                        <button
+                            onClick={() => paginate(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            style={{
+                                padding: '8px 16px',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                background: currentPage === totalPages ? '#f5f5f5' : 'white',
+                                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
+                            }}
+                        >
+                            Next
+                        </button>
                     </div>
                 )}
             </section>

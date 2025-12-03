@@ -37,7 +37,7 @@ export default function SavedJobs() {
                     const job = item.jobs;
                     return {
                         ...job,
-                        postedAt: new Date(job.created_at).toLocaleDateString(),
+                        postedAt: new Date(job.created_at).toLocaleDateString('en-GB'),
                         tags: Array.isArray(job.tags) ? job.tags : (job.tags ? job.tags.split(',') : [])
                     };
                 });

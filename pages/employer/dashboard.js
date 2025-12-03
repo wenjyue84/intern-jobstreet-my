@@ -141,7 +141,7 @@ export default function EmployerDashboard() {
                                                 <div>
                                                     <h4 style={{ margin: '0 0 5px 0', fontSize: '1.2rem' }}>{job.title}</h4>
                                                     <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>
-                                                        Posted on {new Date(job.posted_at).toLocaleDateString()} • {job.location}
+                                                        Posted on {new Date(job.posted_at).toLocaleDateString('en-GB')} • {job.location}
                                                     </p>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '10px' }}>

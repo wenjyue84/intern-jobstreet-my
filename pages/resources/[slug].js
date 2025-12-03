@@ -83,13 +83,13 @@ export default function ArticlePage() {
 
                         <span className="tag" style={{
                             background: article.category === 'CV Tips' ? '#E3F2FD' :
-                                       article.category === 'Interview' ? '#FFF3E0' :
-                                       article.category === 'Job Search' ? '#F3E5F5' :
-                                       article.category === 'Career Advice' ? '#E8F5E9' : '#FFF',
+                                article.category === 'Interview' ? '#FFF3E0' :
+                                    article.category === 'Job Search' ? '#F3E5F5' :
+                                        article.category === 'Career Advice' ? '#E8F5E9' : '#FFF',
                             color: article.category === 'CV Tips' ? '#1565C0' :
-                                   article.category === 'Interview' ? '#E65100' :
-                                   article.category === 'Job Search' ? '#6A1B9A' :
-                                   article.category === 'Career Advice' ? '#2E7D32' : '#333',
+                                article.category === 'Interview' ? '#E65100' :
+                                    article.category === 'Job Search' ? '#6A1B9A' :
+                                        article.category === 'Career Advice' ? '#2E7D32' : '#333',
                             padding: '6px 14px',
                             borderRadius: '4px',
                             fontSize: '0.85rem',
@@ -203,13 +203,17 @@ export default function ArticlePage() {
                         textAlign: 'center'
                     }}>
                         <h3 style={{ marginBottom: '15px', color: 'white' }}>
-                            Ready to Find Your Internship?
+                            {article.targetRole === 'employer'
+                                ? 'Ready to Build Your Dream Team?'
+                                : 'Ready to Find Your Internship?'}
                         </h3>
                         <p style={{ marginBottom: '25px', opacity: 0.9 }}>
-                            Browse hundreds of internship opportunities from top Malaysian companies
+                            {article.targetRole === 'employer'
+                                ? 'Post your internship opportunities and connect with top talent from Malaysian universities'
+                                : 'Browse hundreds of internship opportunities from top Malaysian companies'}
                         </p>
                         <Link
-                            href="/jobs"
+                            href={article.targetRole === 'employer' ? '/employers' : '/jobs'}
                             className="btn btn-primary"
                             style={{
                                 background: 'white',
@@ -221,7 +225,7 @@ export default function ArticlePage() {
                                 display: 'inline-block'
                             }}
                         >
-                            Browse Internships →
+                            {article.targetRole === 'employer' ? 'Start Hiring →' : 'Browse Internships →'}
                         </Link>
                     </div>
                 </article>

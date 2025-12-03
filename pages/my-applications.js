@@ -87,7 +87,7 @@ export default function MyApplications() {
                                         {app.jobs?.company || 'Company Unavailable'} • {app.jobs?.location || 'Location Unavailable'}
                                     </p>
                                     <p style={{ fontSize: '0.9rem', color: '#888' }}>
-                                        Applied on: {new Date(app.applied_at).toLocaleDateString()}
+                                        Applied on: {new Date(app.applied_at).toLocaleDateString('en-GB')}
                                     </p>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>

@@ -1,10 +1,6 @@
-# robots.txt for InternMy Malaysia
-# https://www.robotstxt.org/
-
+# *
 User-agent: *
 Allow: /
-
-# Disallow admin/dashboard pages from search engines
 Disallow: /intern/dashboard
 Disallow: /employer/dashboard
 Disallow: /employer/profile
@@ -12,20 +8,8 @@ Disallow: /my-applications
 Disallow: /saved-jobs
 Disallow: /post-job
 
-# Allow important pages
-Allow: /
-Allow: /jobs
-Allow: /jobs/*
-Allow: /resources
-Allow: /resources/*
-Allow: /about
-Allow: /contact
-Allow: /employers
-Allow: /login
-Allow: /signup
+# Host
+Host: https://internmy.com
 
-# Sitemap location
+# Sitemaps
 Sitemap: https://internmy.com/sitemap.xml
-
-# Crawl delay (be polite to servers)
-Crawl-delay: 1
