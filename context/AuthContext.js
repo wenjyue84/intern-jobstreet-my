@@ -96,7 +96,7 @@ export function AuthProvider({ children }) {
         return { success: true, data, requiresVerification: false };
     };
 
-    const updateRole = async (role) => {
+    const changeUserRole = async (role) => {
         if (!user) return { success: false, error: 'No user logged in' };
 
         const { data, error } = await supabase.auth.updateUser({
@@ -150,7 +150,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, signup, loginWithGoogle, logout, updateRole }}>
+        <AuthContext.Provider value={{ user, loading, login, signup, loginWithGoogle, logout, changeUserRole }}>
             {children}
         </AuthContext.Provider>
     );

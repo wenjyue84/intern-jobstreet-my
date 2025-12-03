@@ -5,16 +5,16 @@ import Head from 'next/head';
 
 export default function Onboarding() {
     const auth = useAuth();
-    const { user, updateRole } = auth;
+    const { user, changeUserRole } = auth;
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         console.log('Onboarding: useAuth result:', auth);
-        if (!updateRole) {
-            console.error('Onboarding: updateRole is missing from useAuth!');
+        if (!changeUserRole) {
+            console.error('Onboarding: changeUserRole is missing from useAuth!');
         }
-    }, [auth, updateRole]);
+    }, [auth, changeUserRole]);
 
     useEffect(() => {
         // If user already has a role, redirect them away
@@ -29,7 +29,7 @@ export default function Onboarding() {
 
     const handleRoleSelect = async (role) => {
         setLoading(true);
-        const { success, error } = await updateRole(role);
+        const { success, error } = await changeUserRole(role);
 
         if (success) {
             if (role === 'employer') {
