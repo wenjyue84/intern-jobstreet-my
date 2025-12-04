@@ -3,10 +3,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useAuth } from '../../context/AuthContext';
 import { MOCK_JOBS } from '../../lib/data';
 import SEOHead from '../../components/SEOHead';
+import CompanyLogo from '../../components/CompanyLogo';
 
 export default function JobDetail({ job }) {
     const router = useRouter();
@@ -140,7 +140,6 @@ export default function JobDetail({ job }) {
                 title={`${job.title} at ${job.company} | InternMy`}
                 description={job.description ? `${job.description.substring(0, 160)}...` : `Internship opportunity at ${job.company}`}
                 url={`https://internmy.com/jobs/${job.id}`}
-                ogImage={`https://ui-avatars.com/api/?name=${job.company}&background=random&size=128`}
                 type="article"
             />
             <div style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '40px 0' }}>
@@ -156,13 +155,7 @@ export default function JobDetail({ job }) {
                                 <span>🕒 {job.postedAt}</span>
                             </div>
                         </div>
-                        <Image
-                            src={`https://ui-avatars.com/api/?name=${job.company}&background=random&size=128`}
-                            alt={job.company}
-                            width={128}
-                            height={128}
-                            style={{ borderRadius: '16px' }}
-                        />
+                        <CompanyLogo company={job.company} size={128} />
                     </div>
                 </div>
             </div>

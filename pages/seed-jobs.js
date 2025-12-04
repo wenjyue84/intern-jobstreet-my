@@ -32,7 +32,7 @@ const generateJobs = (count) => {
     return jobs;
 };
 
-const JOBS_TO_SEED = generateJobs(60);
+const JOBS_TO_SEED = generateJobs(100);
 
 export default function SeedJobs() {
     const [logs, setLogs] = useState([]);
