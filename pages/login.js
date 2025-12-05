@@ -99,6 +99,117 @@ export default function Login() {
                     <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.9rem', color: '#666' }}>
                         Don't have an account? <Link href="/signup" style={{ color: '#0032A0', fontWeight: '600' }}>Sign Up</Link>
                     </div>
+
+                    {/* Quick Login for Development/Demo - Remove in Production */}
+                    <div style={{
+                        marginTop: '30px',
+                        padding: '20px',
+                        background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
+                        borderRadius: '12px',
+                        border: '2px dashed #ff9800'
+                    }}>
+                        <p style={{
+                            textAlign: 'center',
+                            fontSize: '0.85rem',
+                            color: '#e65100',
+                            marginBottom: '15px',
+                            fontWeight: '600'
+                        }}>
+                            ⚡ Quick Login (Dev Only)
+                        </p>
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    const { success, error } = await login('test.intern@demo.com', 'Demo@123');
+                                    if (success) {
+                                        router.push('/');
+                                    } else {
+                                        alert('Quick login failed. Test account may need to be created in Supabase.\n\nEmail: test.intern@demo.com\nPassword: Demo@123\nRole: intern');
+                                    }
+                                }}
+                                style={{
+                                    padding: '10px 20px',
+                                    fontSize: '0.9rem',
+                                    background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontWeight: '600',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                    transition: 'transform 0.2s, box-shadow 0.2s'
+                                }}
+                                onMouseOver={(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)'; }}
+                                onMouseOut={(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'; }}
+                            >
+                                🎓 Intern
+                            </button>
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    const { success, error } = await login('test.employer@demo.com', 'Demo@123');
+                                    if (success) {
+                                        router.push('/employer/dashboard');
+                                    } else {
+                                        alert('Quick login failed. Test account may need to be created in Supabase.\n\nEmail: test.employer@demo.com\nPassword: Demo@123\nRole: employer');
+                                    }
+                                }}
+                                style={{
+                                    padding: '10px 20px',
+                                    fontSize: '0.9rem',
+                                    background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontWeight: '600',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                    transition: 'transform 0.2s, box-shadow 0.2s'
+                                }}
+                                onMouseOver={(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)'; }}
+                                onMouseOut={(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'; }}
+                            >
+                                🏢 Employer
+                            </button>
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    const { success, error } = await login('test.admin@demo.com', 'Demo@123');
+                                    if (success) {
+                                        router.push('/admin/dashboard');
+                                    } else {
+                                        alert('Quick login failed. Test account may need to be created in Supabase.\n\nEmail: test.admin@demo.com\nPassword: Demo@123\nRole: admin');
+                                    }
+                                }}
+                                style={{
+                                    padding: '10px 20px',
+                                    fontSize: '0.9rem',
+                                    background: 'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontWeight: '600',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                    transition: 'transform 0.2s, box-shadow 0.2s'
+                                }}
+                                onMouseOver={(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)'; }}
+                                onMouseOut={(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'; }}
+                            >
+                                👑 Admin
+                            </button>
+                        </div>
+                        <p style={{
+                            textAlign: 'center',
+                            fontSize: '0.75rem',
+                            color: '#bf360c',
+                            marginTop: '10px',
+                            fontStyle: 'italic'
+                        }}>
+                            Remove this section before production!
+                        </p>
+                    </div>
                 </div>
             </div>
         </Layout>

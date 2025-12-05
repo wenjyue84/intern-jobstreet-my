@@ -19,6 +19,9 @@ export default function Navbar() {
                     {user && user.role === 'employer' && (
                         <Link href="/employer/dashboard" className="btn btn-secondary" style={{ border: 'none' }}>Dashboard</Link>
                     )}
+                    {user && user.role === 'admin' && (
+                        <Link href="/admin/dashboard" className="btn btn-secondary" style={{ border: 'none', background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)', color: 'white' }}>👑 Admin Panel</Link>
+                    )}
                     {!loading && (!user || user.role !== 'employer') && (
                         <Link href="/jobs" className="btn btn-secondary" style={{ border: 'none' }}>Jobs</Link>
                     )}

@@ -45,7 +45,35 @@ export default function Dashboard() {
     return (
         <Layout>
             <div className="container" style={{ padding: '40px 0' }}>
-                <h1 style={{ marginBottom: '30px', color: '#0032A0' }}>Intern Dashboard</h1>
+                {/* Top Header Bar */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '30px'
+                }}>
+                    <h1 style={{ margin: 0, color: '#0032A0' }}>Intern Dashboard</h1>
+                    <button
+                        onClick={logout}
+                        className="btn"
+                        style={{
+                            padding: '10px 24px',
+                            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                            border: 'none',
+                            borderRadius: '8px',
+                            color: 'white',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            fontWeight: '500',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
+                        }}
+                    >
+                        🚪 Logout
+                    </button>
+                </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '30px' }}>
                     {/* Sidebar / Profile Card */}
@@ -79,16 +107,6 @@ export default function Dashboard() {
                             }}>
                                 {user.role === 'intern' ? 'Intern' : user.role}
                             </span>
-                        </div>
-
-                        <div style={{ borderTop: '1px solid #eee', paddingTop: '20px', marginTop: '20px' }}>
-                            <button
-                                onClick={logout}
-                                className="btn btn-secondary"
-                                style={{ width: '100%', border: '1px solid #ddd' }}
-                            >
-                                Logout
-                            </button>
                         </div>
                     </div>
 
